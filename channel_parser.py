@@ -1,10 +1,16 @@
 # ChickenFryBiryani
 
+import os
 import json
 import datetime
 import database_connector
 
 chat_folder_path = "/home/rob/Downloads/Telegram Desktop/ChatExport_2020-10-27/"
+remote_telegram_root = "/home/covid19/covid19telegram/"
+m_sServerPass = "uvNjdEbsn3t5uyiQkXgw"
+local_path = chat_folder_path
+m_sServerUser = "covid19"
+m_sServerHost = "jaguar.cs.gsu.edu"
 telegram_channel_id = ""
 
 
@@ -18,9 +24,9 @@ def getDateString(date_str):
 
 def getMediaPath(message):
     if 'photo' in message:
-        return str(telegram_channel_id) + '/' + chat_folder_path.split('/')[-2] + '/' + message['photo']
+        return str(telegram_channel_id) + '/' + chat_folder_path.split('/')[-2].split('_')[1] + '/' + message['photo']
     if 'file' in message:
-        return str(telegram_channel_id) + '/' + chat_folder_path.split('/')[-2] + '/' + message['file']
+        return str(telegram_channel_id) + '/' + chat_folder_path.split('/')[-2].split('_')[1] + '/' + message['file']
     return ''
 
 
@@ -61,6 +67,11 @@ def main():
                                       getText(x), getMediaPath(x)), pending_msgs))
     rows_added = telegram_db.add_channel_chat_posts(insert_msgs)
     print('Chat posts added: ', rows_added)
+    # Copy telegram chat to jaguar
+    remote_path = str(telegram_channel_id) + '/'
+    telegram_db.copy_folder_to_jaguar(chat_folder_path, remote_path)
+    if input('Delete the data in local system?(y/n): ').lower() == 'y':
+        os.system('rm -rf {}'.format(chat_folder_path))
     return
 
 

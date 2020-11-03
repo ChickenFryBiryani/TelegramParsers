@@ -1,4 +1,5 @@
 # ChickenFryBiryani
+import os
 import time
 import mysql
 import mysql.connector
@@ -17,6 +18,7 @@ class mySQLTelegramDB:
         self.m_sServerPort = "3306"
         self.telegram_conn = None
         self.telegram_cursor = None
+        self.telegram_data_root = "/home/covid19/covid19telegram/"
 
     def get_db_connection(self):
         retries = 5
@@ -95,3 +97,10 @@ class mySQLTelegramDB:
         self.telegram_conn.commit()
         self.close_db_connection()
         return rows_inserted
+
+    def copy_folder_to_jaguar(self, local_path, remote_path):
+        # check if the folder exists in jaguar. if not create
+        cd = "sshpass -p '{}' rsync -ave ssh -r {} {}@{}:{}".format(self.m_sServerPasswd, local_path.replace(' ', "\ "),
+                                                                    self.m_sServerUser, self.m_sServerHost,
+                                                                    self.telegram_data_root + remote_path)
+        os.system(cd)
