@@ -9,7 +9,7 @@ telegram_channel_id = ""
 
 
 def decodeStr(string):
-    return string.encode('unicode-escape').decode("utf-8")
+    return string
 
 
 def getDateString(date_str):
@@ -57,7 +57,7 @@ def main():
     if not from_msg_id:
         return
     pending_msgs = list(filter(lambda x: x['id'] >= from_msg_id and x['type'] == 'message', chat_content['messages']))
-    insert_msgs = list(map(lambda x: (channel_id, str(x['id']), getDateString(x['date']),
+    insert_msgs = list(map(lambda x: (channel_id, 'message', str(x['id']), getDateString(x['date']),
                                       getText(x), getMediaPath(x)), pending_msgs))
     rows_added = telegram_db.add_channel_chat_posts(insert_msgs)
     print('Chat posts added: ', rows_added)

@@ -2,6 +2,8 @@
 import time
 import mysql
 import mysql.connector
+import codecs
+codecs.register(lambda name: codecs.lookup('utf8') if name == 'utf8mb4' else None)
 
 
 class mySQLTelegramDB:
@@ -21,7 +23,7 @@ class mySQLTelegramDB:
         while retries != 0:
             try:
                 self.telegram_conn = mysql.connector.connect(host=self.m_sServerHost, user=self.m_sServerDatabaseUser,
-                                                        passwd=self.m_sServerDatabasePasswd,
+                                                        passwd=self.m_sServerDatabasePasswd, charset="utf8mb4",
                                                         database=self.m_sServerDatabase, port=self.m_sServerPort)
                 self.telegram_cursor = self.telegram_conn.cursor()
                 return True
@@ -73,7 +75,7 @@ class mySQLTelegramDB:
     def get_last_added_msg_id(self, channel_or_group_id):
         if not self.get_db_connection():
             return False
-        query = "SELECT telegram_msg_id FROM chat_posts WHERE group_channel_id = '{}' ORDER BY " \
+        query = "SELECT telegram_post_id FROM chat_posts WHERE group_channel_id = '{}' ORDER BY " \
                 "post_id DESC LIMIT 1".format(channel_or_group_id)
         self.telegram_cursor.execute(query)
         if self.telegram_cursor.rowcount == 1:
@@ -86,8 +88,8 @@ class mySQLTelegramDB:
     def add_channel_chat_posts(self, message_list):
         if not self.get_db_connection():
             return False
-        query = """INSERT INTO chat_posts (group_channel_id, telegram_msg_id, post_date, post_text, media_path) VALUES 
-        (%s, %s, %s, %s, %s)"""
+        query = """INSERT INTO chat_posts (group_channel_id, post_type, telegram_post_id, post_date, post_text, 
+        media_path) VALUES (%s, %s, %s, %s, %s, %s)"""
         self.telegram_cursor.executemany(query, message_list)
         rows_inserted = self.telegram_cursor.rowcount
         self.telegram_conn.commit()
