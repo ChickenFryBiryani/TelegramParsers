@@ -14,10 +14,6 @@ m_sServerHost = "jaguar.cs.gsu.edu"
 telegram_channel_id = ""
 
 
-def decodeStr(string):
-    return string
-
-
 def getDateString(date_str):
     return datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S').strftime('%Y%m%d%H%M%S')
 
@@ -34,9 +30,8 @@ def getText(message):
     if 'text' not in message or message['text'] == '':
         return ''
     if type(message['text']) == str:
-        return decodeStr(message['text'])
-    return ' '.join(list(map(lambda x: decodeStr(x).strip() if type(x) == str else decodeStr(x['text']).strip(),
-                             message['text'])))
+        return message['text']
+    return ' '.join(list(map(lambda x: x.strip() if type(x) == str else x['text'].strip(), message['text'])))
 
 
 def main():
@@ -47,25 +42,25 @@ def main():
         print('Not a channel.')
         return
     telegram_channel_id = chat_content['id']
-    telegram_channel_name = decodeStr(chat_content['name'])
+    telegram_channel_name = chat_content['name']
     telegram_db = database_connector.mySQLTelegramDB()
-    search_response = telegram_db.get_id_from_telegram_id(False, telegram_channel_id)
+    search_response = telegram_db.get_channel_id_from_telegram_id(telegram_channel_id)
     if not search_response:
         return
     if search_response > 0:
         channel_id = search_response
     else:
-        add_response = telegram_db.add_group_channel(False, telegram_channel_id, telegram_channel_name)
+        add_response = telegram_db.add_channel(telegram_channel_id, telegram_channel_name)
         if not add_response:
             return
         channel_id = add_response
-    from_msg_id = telegram_db.get_last_added_msg_id(channel_id)
+    from_msg_id = telegram_db.get_last_added_msg_id_in_channel(channel_id)
     if not from_msg_id:
         return
-    pending_msgs = list(filter(lambda x: x['id'] >= from_msg_id and x['type'] == 'message', chat_content['messages']))
-    insert_msgs = list(map(lambda x: (channel_id, 'message', str(x['id']), getDateString(x['date']),
-                                      getText(x), getMediaPath(x)), pending_msgs))
-    rows_added = telegram_db.add_channel_chat_posts(insert_msgs)
+    pending_msgs = list(filter(lambda x: x['id'] > from_msg_id, chat_content['messages']))
+    insert_msgs = list(map(lambda x: (channel_id, 'message' if x['type'] == 'message' else x['action'], str(x['id']),
+                                      getDateString(x['date']), getText(x), getMediaPath(x)), pending_msgs))
+    rows_added = telegram_db.add_channel_messages(insert_msgs)
     print('Chat posts added: ', rows_added)
     # Copy telegram chat to jaguar
     remote_path = str(telegram_channel_id) + '/'
