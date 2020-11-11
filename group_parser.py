@@ -61,7 +61,7 @@ def main():
     if len(pending_msgs) == 0:
         print('No new messages.')
         if input('Delete the data in local system?(y/n): ').lower() == 'y':
-            os.system('rm -rf {}'.format(chat_folder_path))
+            os.system('rm -rf {}'.format(chat_folder_path.replace(' ', '\ ')))
         return
     # Add all the new users to group_users table
     from_users = list(set(map(lambda x: (x['from'], x['from_id']) if 'from' in x else (x['actor'], x['actor_id']),
@@ -78,7 +78,7 @@ def main():
     remote_path = str(telegram_group_id) + '/'
     telegram_db.copy_folder_to_jaguar(chat_folder_path, remote_path)
     if input('Delete the data in local system?(y/n): ').lower() == 'y':
-        os.system('rm -rf {}'.format(chat_folder_path))
+        os.system('rm -rf {}'.format(chat_folder_path.replace(' ', '\ ')))
     return
 
 

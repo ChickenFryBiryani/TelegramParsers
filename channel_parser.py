@@ -66,7 +66,7 @@ def main():
     remote_path = str(telegram_channel_id) + '/'
     telegram_db.copy_folder_to_jaguar(chat_folder_path, remote_path)
     if input('Delete the data in local system?(y/n): ').lower() == 'y':
-        os.system('rm -rf {}'.format(chat_folder_path))
+        os.system('rm -rf {}'.format(chat_folder_path.replace(' ', '\ ')))
     return
 
 
