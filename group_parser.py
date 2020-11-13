@@ -5,7 +5,7 @@ import json
 import datetime
 import database_connector
 
-chat_folder_path = "/home/rob/Downloads/Telegram Desktop/ChatExport_2020-10-29/"
+chat_folder_path = "/home/rob/Downloads/Telegram Desktop/ChatExport_2020-11-12/"
 remote_telegram_root = "/home/covid19/covid19telegram/"
 m_sServerPass = "uvNjdEbsn3t5uyiQkXgw"
 local_path = chat_folder_path
@@ -64,10 +64,10 @@ def main():
             os.system('rm -rf {}'.format(chat_folder_path.replace(' ', '\ ')))
         return
     # Add all the new users to group_users table
-    from_users = list(set(map(lambda x: (x['from'], x['from_id']) if 'from' in x else (x['actor'], x['actor_id']),
-                              pending_msgs)))
-    telegram_ids = list(map(lambda x: x[1], from_users))
-    user_ids = telegram_db.add_users_if_not_exists(from_users)
+    users = list(set(map(lambda x: (str(x['from']), x['from_id']) if 'from' in x else (str(x['actor']), x['actor_id']),
+                         pending_msgs)))
+    telegram_ids = list(map(lambda x: x[1], users))
+    user_ids = telegram_db.add_users_if_not_exists(users)
     new_msgs = list(map(lambda x: (group_id, 'message' if x['type'] == 'message' else x['action'], str(x['id']),
                                    user_ids[telegram_ids.index(x['from_id'] if 'from_id' in x else x['actor_id'])],
                                    x['reply_to_message_id'] if 'reply_to_message_id' in x else '',
