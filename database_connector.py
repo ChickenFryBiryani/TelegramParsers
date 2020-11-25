@@ -165,9 +165,10 @@ class mySQLTelegramDB:
         self.close_db_connection()
         return rows_inserted
 
-    def copy_folder_to_jaguar(self, local_path, remote_path):
+    def copy_folder_to_jaguar(self, local_path, remote_path, is_group):
         # check if the folder exists in jaguar. if not create
+        folder = "groups/" if is_group else "channels/"
         cd = "sshpass -p '{}' rsync -ave ssh -r {} {}@{}:{}".format(self.m_sServerPasswd, local_path.replace(' ', "\ "),
                                                                     self.m_sServerUser, self.m_sServerHost,
-                                                                    self.telegram_data_root + remote_path)
+                                                                    self.telegram_data_root + folder + remote_path)
         os.system(cd)

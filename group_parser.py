@@ -5,7 +5,7 @@ import json
 import datetime
 import database_connector
 
-chat_folder_path = "/home/rob/Downloads/Telegram Desktop/ChatExport_2020-11-12/"
+chat_folder_path = "/home/rob/Downloads/Telegram Desktop/ChatExport_2020-11-19/"
 remote_telegram_root = "/home/covid19/covid19telegram/"
 m_sServerPass = "uvNjdEbsn3t5uyiQkXgw"
 local_path = chat_folder_path
@@ -76,7 +76,9 @@ def main():
     print('Chat posts added: ', rows_added)
     # Copy telegram chat to jaguar
     remote_path = str(telegram_group_id) + '/'
-    telegram_db.copy_folder_to_jaguar(chat_folder_path, remote_path)
+    # Rename the result json
+    os.rename(chat_folder_path + 'result.json', chat_folder_path + "{}.json".format(chat_folder_path[-11:-1]))
+    telegram_db.copy_folder_to_jaguar(chat_folder_path, remote_path, is_group=True)
     if input('Delete the data in local system?(y/n): ').lower() == 'y':
         os.system('rm -rf {}'.format(chat_folder_path.replace(' ', '\ ')))
     return
