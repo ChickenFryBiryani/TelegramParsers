@@ -108,11 +108,16 @@ class mySQLTelegramDB:
         new_user_count = self.telegram_cursor.rowcount
         self.telegram_conn.commit()
         print('New users added:', new_user_count)
-        id_query = "SELECT user_id FROM group_users where user_telegram_id in {};".format(str(tuple(map(lambda x: x[1],
-                                                                                                        users_info))))
+        id_query = "SELECT user_id, user_telegram_id FROM group_users where user_telegram_id in {};".\
+            format(str(tuple(map(lambda x: x[1], users_info))))
         self.telegram_cursor.execute(id_query)
-        user_ids = list(map(lambda x: x[0], self.telegram_cursor.fetchall()))
+        result = self.telegram_cursor.fetchall()
+        print(result)
+        user_id_dict = {}
+        for tid in result:
+            user_id_dict[str(tid[1])] = tid[0]
         self.close_db_connection()
+        user_ids = [user_id_dict[str(tid[1])] for tid in users_info]
         return user_ids
 
     def get_last_added_msg_id_in_channel(self, channel_id):
