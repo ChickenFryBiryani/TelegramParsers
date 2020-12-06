@@ -112,7 +112,7 @@ class mySQLTelegramDB:
             format(str(tuple(map(lambda x: x[1], users_info))))
         self.telegram_cursor.execute(id_query)
         result = self.telegram_cursor.fetchall()
-        print(result)
+        # print(result)
         user_id_dict = {}
         for tid in result:
             user_id_dict[str(tid[1])] = tid[0]
